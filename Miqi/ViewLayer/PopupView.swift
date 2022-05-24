@@ -15,42 +15,86 @@ struct PopupView: View {
     @State var breathingProgress = 0.0
     
     var body: some View {
-        ZStack {
-            gradientView
-            VStack(alignment: .center, spacing: 16) {
-                Spacer()
-                ZStack {
-                    titleView(text: "It's time to take a breath")
-                        .isHidden(animationState == .final || animationState == .stopped)
-                    titleView(text: "Well done!")
-                        .isHidden(animationState != .final)
-                    appInfo
-                        .transition(.opacity)
-                        .isHidden(animationState != .stopped)
+        GeometryReader { proxy in
+            ZStack {
+                gradientView
+                VStack(alignment: .center, spacing: 60) {
+                    Spacer()
+                    ZStack {
+                        titleView(text: "It's time to take a breath")
+                            .isHidden(animationState == .final || animationState == .stopped)
+                        titleView(text: "Well done!")
+                            .isHidden(animationState != .final)
+                    }
+                    ZStack {
+                        BreathAnimationView(
+                            color: Constants.progressViewColor,
+                            animationState: $animationState
+                        )
+                        .padding(20)
+                        progressView
+                    }
+                    .isHidden(animationState == .stopped)
+                    
+                   Spacer()
                 }
-                ZStack {
-                    BreathAnimationView(
-                        color: Constants.progressViewColor,
-                        animationState: $animationState
-                    )
-                    .padding(20)
-                    progressView
+                .padding()
+                Divider()
+                    .isHidden(animationState != .stopped)
+                VStack(spacing: 0) {
+                    Rectangle()
+                        .foregroundColor(.black.opacity(0.01))
+                        .overlay(
+                            VStack {
+                            appInfo
+                            Text("Swipe down to continue in this app...")
+                                .foregroundColor(Color("PrimaryText"))
+                                .font(.title3)
+                            }
+                        )
+                        .frame(height: proxy.size.height/2)
+                        .highPriorityGesture(
+                            DragGesture()
+                                .onEnded({ (value) in
+                                    
+                                    if value.translation.height > 0 &&
+                                        value.translation.width < 100 &&
+                                        value.translation.width > -100 {
+                                        stayInApp()
+                                    }
+                                })
+                        )
+                        
+                        
+                    Rectangle()
+                        .foregroundColor(.black.opacity(0.01))
+                        .overlay(
+                            Text("Swipe up to continue in the app...")
+                                .foregroundColor(Color("PrimaryText"))
+                                .font(.title3)
+                        )
+                        .frame(height: proxy.size.height/2)
+                        .highPriorityGesture(
+                            DragGesture()
+                                .onEnded({ (value) in
+                                    
+                                    if value.translation.height < 0 &&
+                                        value.translation.width < 100 &&
+                                        value.translation.width > -100 {
+                                        continueInApp()
+                                    }
+                                })
+                        )
                 }
-                .isHidden(animationState == .stopped)
-                Spacer()
-                Group {
-                    stayInAppButton
-                    continueButton
-                }
-                .transition(.opacity)
                 .isHidden(animationState != .stopped)
-            }.padding()
-        }
-        .onAppear {
-            startBreathAnimation()
-        }
-        .onDisappear {
-            animationState = .stopped
+            }
+            .frame(maxWidth: .infinity)
+            .onAppear {
+                startBreathAnimation()
+            }
+            .onDisappear {
+                animationState = .stopped
+            }
         }
     }
     
@@ -63,27 +107,16 @@ struct PopupView: View {
         ).ignoresSafeArea()
     }
     
-    var stayInAppButton: some View {
-        Button("I don't want to open this app") {
-            presentationMode.wrappedValue.dismiss()
-        }
-        .padding()
-        .foregroundColor(Color("PrimaryText"))
-        .font(.title3)
-        .background(Color("AccentText"))
-        .cornerRadius(10)
+    private func stayInApp(){
+        presentationMode.wrappedValue.dismiss()
     }
     
-    var continueButton: some View {
-        Button("Continue with the app") {
-            openAttemptInfo.app.map {
-                AppOpeningGuardService.shared.updateDidProceed(for: $0, with: Date.now)
-            }
-            if let url = openAttemptInfo.app?.url { openURL.callAsFunction(url) }
-            presentationMode.wrappedValue.dismiss()
+    private func continueInApp() {
+        openAttemptInfo.app.map {
+            AppOpeningGuardService.shared.updateDidProceed(for: $0, with: Date.now)
         }
-        .foregroundColor(Color("PrimaryText"))
-        .font(.title3)
+        if let url = openAttemptInfo.app?.url { openURL.callAsFunction(url) }
+        presentationMode.wrappedValue.dismiss()
     }
     
     var progressView: some View {
