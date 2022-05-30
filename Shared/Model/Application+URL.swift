@@ -13,7 +13,7 @@ extension Application {
     private var urlScheme: String {
         switch self {
         case .unknown:
-            return "tiktok://"
+            return "-"
         case .instagram:
             return "instagram://"
         case .tiktok:

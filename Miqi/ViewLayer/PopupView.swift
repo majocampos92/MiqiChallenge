@@ -145,6 +145,11 @@ struct PopupView: View {
         }
         .padding()
         .isHidden(appInfoIsHidden, shouldBeRemoved: true)
+        .onAppear {
+                   print("App \(String(describing: openAttemptInfo.app))")
+                   print("Number \(String(describing: openAttemptInfo.attemptsNumber))")
+                   print("Time \(String(describing: openAttemptInfo.timeSpent))")
+               }
     }
     
     private func titleView(text: String) -> some View {
