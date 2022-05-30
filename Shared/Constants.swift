@@ -8,8 +8,8 @@
 import Foundation
 
 enum Constants {
-    static let appGroup = "group.com.applications.miqi"
+    static let appGroup = "group.com.maria.miqi"
     static let appStatsStorage = "app.data"
-    static let openAppUserActivity = "com.gloomylego.miqi.openapp"
+    static let openAppUserActivity = "com.maria.miqi.openapp"
     static let openAppUserInfoKey = "application"
 }
