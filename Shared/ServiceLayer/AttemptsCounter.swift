@@ -46,9 +46,9 @@ final class AttemptsCounter {
             return
         }
         let timeSpent = areTheSameDay(date, lastAttempt)
-            ? appStats.totalTimeSpent + date.timeIntervalSince(lastAttempt)
+            ? date.timeIntervalSince(lastAttempt)
             : date.timeIntervalSince(startOfDay(for: date))
-        appStats.totalTimeSpent = timeSpent
+        appStats.totalTimeSpent += timeSpent
         appStats.lastCloseDate = date
         storage.saveAppStats(appStats, for: app)
         return
